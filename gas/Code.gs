@@ -14,7 +14,6 @@ function onOpen() {
     .addItem('プレイヤー統計表示', 'showPlayerStats')
     .addItem('システム情報表示', 'showSystemInfo')
     .addSeparator()
-    .addItem('テストデータ生成', 'generateTestData')
     .addItem('テスト実行', 'runTests')
     .addToUi();
 }
@@ -212,26 +211,6 @@ function showErrorDialog(message) {
   ui.alert('エラー', message, ui.ButtonSet.OK);
 }
 
-/**
- * テストデータ生成（開発用）
- */
-function generateTestData() {
-  try {
-    const result = SpreadsheetApp.getUi().alert(
-      'テストデータ生成',
-      'テストデータを生成しますか？\n既存データは保持されます。',
-      SpreadsheetApp.getUi().ButtonSet.YES_NO
-    );
-
-    if (result === SpreadsheetApp.getUi().Button.YES) {
-      createTestData();
-      showSuccessDialog('テストデータを生成しました。');
-    }
-  } catch (error) {
-    logError('テストデータ生成エラー', error);
-    showErrorDialog('テストデータ生成に失敗しました。');
-  }
-}
 
 /**
  * テスト実行（開発用）
