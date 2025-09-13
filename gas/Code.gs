@@ -11,10 +11,6 @@ function onOpen() {
   ui.createMenu('レーティングシステム')
     .addItem('レーティング計算実行', 'processRatings')
     .addSeparator()
-    .addItem('プレイヤー統計表示', 'showPlayerStats')
-    .addItem('システム情報表示', 'showSystemInfo')
-    .addSeparator()
-    .addItem('テストデータ生成', 'generateTestData')
     .addItem('テスト実行', 'runTests')
     .addToUi();
 }
@@ -99,91 +95,6 @@ function processRatings() {
   }
 }
 
-/**
- * プレイヤー統計情報表示
- */
-function showPlayerStats() {
-  try {
-    const sheets = getSheets();
-    if (!validateSheets(sheets)) {
-      showErrorDialog('必要なシートが見つかりません。');
-      return;
-    }
-
-    const playerData = loadPlayerData(sheets.playerList);
-    const playerMap = createPlayerMap(playerData);
-    const stats = getPlayerStats(playerMap);
-
-    if (stats.totalPlayers === 0) {
-      showInfoDialog('プレイヤーデータが見つかりませんでした。');
-      return;
-    }
-
-    const message = [
-      '=== プレイヤー統計 ===',
-      '',
-      `総プレイヤー数: ${stats.totalPlayers}名`,
-      `平均レーティング: ${stats.averageRating}`,
-      `最高レーティング: ${stats.highestRating}`,
-      `最低レーティング: ${stats.lowestRating}`,
-      `平均対局数: ${stats.averageGames}局`,
-      '',
-      '詳細はコンソールログを確認してください。'
-    ].join('\n');
-
-    displayPlayerList(playerMap, 20);
-    showInfoDialog(message);
-
-  } catch (error) {
-    logError('統計表示エラー', error);
-    showErrorDialog('統計情報の取得に失敗しました。');
-  }
-}
-
-/**
- * システム情報表示
- */
-function showSystemInfo() {
-  try {
-    const sheets = getSheets();
-    const sheetsStatus = [
-      `${SHEET_NAMES.PLAYER_LIST}: ${sheets.playerList ? '✓' : '✗'}`,
-      `${SHEET_NAMES.MATCH_DATA}: ${sheets.matchData ? '✓' : '✗'}`,
-      `${SHEET_NAMES.RATING_CALC}: ${sheets.ratingCalc ? '✓' : '✗'}`
-    ];
-
-    let lastUpdate = '未設定';
-    if (sheets.ratingCalc) {
-      const lastUpdateTime = getLastUpdateTime(sheets.ratingCalc);
-      if (lastUpdateTime) {
-        lastUpdate = formatDate(lastUpdateTime);
-      }
-    }
-
-    const message = [
-      '=== システム情報 ===',
-      '',
-      '■ シート構成:',
-      ...sheetsStatus,
-      '',
-      `■ 最終更新日時: ${lastUpdate}`,
-      '',
-      '■ レーティング設定:',
-      `初期レーティング: ${RATING_CONFIG.INITIAL_RATING}`,
-      `順位点: [${RATING_CONFIG.PLACEMENT_POINTS.join(', ')}]`,
-      `補正係数: ${RATING_CONFIG.CORRECTION_FACTOR}`,
-      `対局数係数: ${RATING_CONFIG.GAMES_FACTOR}`,
-      `最小補正値: ${RATING_CONFIG.MIN_CORRECTION}`,
-      `最大補正対局数: ${RATING_CONFIG.MAX_CORRECTION_GAMES}`
-    ].join('\n');
-
-    showInfoDialog(message);
-
-  } catch (error) {
-    logError('システム情報表示エラー', error);
-    showErrorDialog('システム情報の取得に失敗しました。');
-  }
-}
 
 /**
  * 成功ダイアログ表示
@@ -212,26 +123,6 @@ function showErrorDialog(message) {
   ui.alert('エラー', message, ui.ButtonSet.OK);
 }
 
-/**
- * テストデータ生成（開発用）
- */
-function generateTestData() {
-  try {
-    const result = SpreadsheetApp.getUi().alert(
-      'テストデータ生成',
-      'テストデータを生成しますか？\n既存データは保持されます。',
-      SpreadsheetApp.getUi().ButtonSet.YES_NO
-    );
-
-    if (result === SpreadsheetApp.getUi().Button.YES) {
-      createTestData();
-      showSuccessDialog('テストデータを生成しました。');
-    }
-  } catch (error) {
-    logError('テストデータ生成エラー', error);
-    showErrorDialog('テストデータ生成に失敗しました。');
-  }
-}
 
 /**
  * テスト実行（開発用）

@@ -35,6 +35,54 @@ function runAllTests() {
 }
 
 /**
+ * 簡単なテスト用対局データ作成
+ */
+function createSimpleTestMatch() {
+  const testMatch = new Array(18).fill('');
+
+  const now = new Date();
+  const startTime = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2時間前
+  const endTime = new Date(now.getTime() - 30 * 60 * 1000); // 30分前
+
+  testMatch[MATCH_COLUMN.START_TIME] = startTime;
+  testMatch[MATCH_COLUMN.END_TIME] = endTime;
+
+  // テスト用プレイヤー
+  const testPlayers = [
+    { id: 'test001', name: 'テスト1位' },
+    { id: 'test002', name: 'テスト2位' },
+    { id: 'test003', name: 'テスト3位' },
+    { id: 'test004', name: 'テスト4位' }
+  ];
+
+  const testScores = [15000, 5000, -5000, -15000];
+
+  testPlayers.forEach((player, index) => {
+    testMatch[MATCH_COLUMN.PLAYER_IDS[index]] = player.id;
+    testMatch[MATCH_COLUMN.PLAYER_NAMES[index]] = player.name;
+    testMatch[MATCH_COLUMN.SCORES[index]] = testScores[index];
+    testMatch[MATCH_COLUMN.FINAL_SCORES[index]] = testScores[index] + RATING_CONFIG.PLACEMENT_POINTS[index] * 100;
+  });
+
+  return testMatch;
+}
+
+/**
+ * ランダムプレイヤー選択
+ */
+function selectRandomPlayers(playerIds, count) {
+  const selected = [];
+  const available = [...playerIds];
+
+  for (let i = 0; i < count && available.length > 0; i++) {
+    const randomIndex = Math.floor(Math.random() * available.length);
+    selected.push(available.splice(randomIndex, 1)[0]);
+  }
+
+  return selected;
+}
+
+/**
  * ユーティリティ関数テスト
  */
 function testUtils() {
@@ -224,7 +272,7 @@ function testEndToEnd() {
 
   try {
     // テスト用対局データ
-    const testMatch = createTestMatch();
+    const testMatch = createSimpleTestMatch();
 
     // テスト用プレイヤーマップ
     const testPlayerMap = new Map();
@@ -320,7 +368,7 @@ function testPerformance() {
   // テスト用対局データ作成
   const playerIds = Array.from(testPlayerMap.keys());
   for (let i = 0; i < 100; i++) {
-    const selectedPlayers = getRandomPlayers(4, playerIds.length);
+    const selectedPlayers = selectRandomPlayers(playerIds, 4);
     const testMatch = new Array(18).fill('');
 
     const matchDate = new Date('2025-01-10');
@@ -329,8 +377,8 @@ function testPerformance() {
     testMatch[MATCH_COLUMN.START_TIME] = new Date(matchDate);
     testMatch[MATCH_COLUMN.END_TIME] = new Date(matchDate.getTime() + 90 * 60 * 1000);
 
-    selectedPlayers.forEach((playerIndex, pos) => {
-      testMatch[MATCH_COLUMN.PLAYER_IDS[pos]] = playerIds[playerIndex];
+    selectedPlayers.forEach((playerId, pos) => {
+      testMatch[MATCH_COLUMN.PLAYER_IDS[pos]] = playerId;
       testMatch[MATCH_COLUMN.SCORES[pos]] = (pos === 0 ? 15000 : pos === 1 ? 5000 : pos === 2 ? -5000 : -15000);
     });
 
