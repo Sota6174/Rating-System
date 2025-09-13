@@ -189,3 +189,8 @@ data/*.json
 data/*.xlsx
 !data/sample_*
 !data/test_*
+
+# その他
+Git.md
+memo.md
+.mcp.json
