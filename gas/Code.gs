@@ -8,7 +8,9 @@
  */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu("レーティングシステム").addItem("レーティング計算実行", "processRatings").addSeparator().addItem("テスト実行", "runTests").addToUi();
+  ui.createMenu('レーティングシステム')
+    .addItem('レーティング計算実行', 'processRatings')
+    .addToUi();
 }
 
 /**
@@ -115,22 +117,4 @@ function showInfoDialog(message) {
 function showErrorDialog(message) {
   const ui = SpreadsheetApp.getUi();
   ui.alert("エラー", message, ui.ButtonSet.OK);
-}
-
-/**
- * テスト実行（開発用）
- */
-function runTests() {
-  try {
-    const timer = new Timer();
-    logInfo("=== テスト実行開始 ===");
-
-    runAllTests();
-
-    const message = `テスト実行完了\n\n${timer.elapsedMessage()}\n\n詳細はコンソールログを確認してください。`;
-    showInfoDialog(message);
-  } catch (error) {
-    logError("テスト実行エラー", error);
-    showErrorDialog("テスト実行に失敗しました。");
-  }
 }
