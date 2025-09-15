@@ -35,7 +35,7 @@ function parseDate(dateValue) {
  */
 function formatDate(date, format = DATE_FORMAT.DISPLAY) {
   if (!date || !(date instanceof Date)) {
-    return '';
+    return "";
   }
 
   return Utilities.formatDate(date, Session.getScriptTimeZone(), format);
@@ -47,7 +47,7 @@ function formatDate(date, format = DATE_FORMAT.DISPLAY) {
  * @return {boolean} - 数値かどうか
  */
 function isNumber(value) {
-  return typeof value === 'number' && !isNaN(value);
+  return typeof value === "number" && !isNaN(value);
 }
 
 /**
@@ -56,7 +56,7 @@ function isNumber(value) {
  * @return {boolean} - 空でない文字列かどうか
  */
 function isNotEmpty(value) {
-  return typeof value === 'string' && value.trim().length > 0;
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 /**
@@ -78,39 +78,39 @@ function validateMatchData(matchRow) {
 
   // 開始時間チェック
   if (!parseDate(matchRow[MATCH_COLUMN.START_TIME])) {
-    errors.push('開始時間が無効です');
+    errors.push("開始時間が無効です");
   }
 
   // 終了時間チェック
   if (!parseDate(matchRow[MATCH_COLUMN.END_TIME])) {
-    errors.push('終了時間が無効です');
+    errors.push("終了時間が無効です");
   }
 
   // プレイヤーIDチェック
-  const playerIds = MATCH_COLUMN.PLAYER_IDS.map(col => matchRow[col]);
-  const validPlayerIds = playerIds.filter(id => isValidPlayerId(id));
+  const playerIds = MATCH_COLUMN.PLAYER_IDS.map((col) => matchRow[col]);
+  const validPlayerIds = playerIds.filter((id) => isValidPlayerId(id));
 
   if (validPlayerIds.length !== 4) {
-    errors.push('プレイヤーIDが4人分必要です');
+    errors.push("プレイヤーIDが4人分必要です");
   }
 
   // プレイヤーID重複チェック
   const uniqueIds = new Set(validPlayerIds);
   if (uniqueIds.size !== validPlayerIds.length) {
-    errors.push('プレイヤーIDに重複があります');
+    errors.push("プレイヤーIDに重複があります");
   }
 
   // スコアチェック
-  const scores = MATCH_COLUMN.SCORES.map(col => matchRow[col]);
-  const validScores = scores.filter(score => isNumber(score));
+  const scores = MATCH_COLUMN.SCORES.map((col) => matchRow[col]);
+  const validScores = scores.filter((score) => isNumber(score));
 
   if (validScores.length !== 4) {
-    errors.push('スコアが4人分必要です');
+    errors.push("スコアが4人分必要です");
   }
 
   return {
     isValid: errors.length === 0,
-    errors: errors
+    errors: errors,
   };
 }
 
@@ -122,7 +122,7 @@ function validateMatchData(matchRow) {
  */
 function findFirstEmptyRow(data, startRow = 1) {
   for (let i = startRow; i < data.length; i++) {
-    if (!data[i][PLAYER_COLUMN.ID] || data[i][PLAYER_COLUMN.ID] === '') {
+    if (!data[i][PLAYER_COLUMN.ID] || data[i][PLAYER_COLUMN.ID] === "") {
       return i;
     }
   }
@@ -136,13 +136,13 @@ function findFirstEmptyRow(data, startRow = 1) {
  */
 function setPlayerDefaults(player) {
   return {
-    id: player.id || '',
-    name: player.name || '',
+    id: player.id || "",
+    name: player.name || "",
     rating: isNumber(player.rating) ? player.rating : DEFAULT_VALUES.RATING,
     games: isNumber(player.games) ? player.games : DEFAULT_VALUES.GAMES,
     lastMatchDate: parseDate(player.lastMatchDate) || parseDate(DEFAULT_VALUES.DATE),
     prevMonthRating: isNumber(player.prevMonthRating) ? player.prevMonthRating : DEFAULT_VALUES.RATING,
-    prevMonthGames: isNumber(player.prevMonthGames) ? player.prevMonthGames : DEFAULT_VALUES.GAMES
+    prevMonthGames: isNumber(player.prevMonthGames) ? player.prevMonthGames : DEFAULT_VALUES.GAMES,
   };
 }
 
