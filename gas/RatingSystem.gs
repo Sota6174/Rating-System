@@ -55,10 +55,12 @@ function processMatchRating(matchRow, playerMap) {
     // プレイヤー情報取得
     const players = [];
     const playerIds = MATCH_COLUMN.PLAYER_IDS.map(col => matchRow[col]);
+    const playerNames = MATCH_COLUMN.PLAYER_NAMES.map(col => matchRow[col]);
     const scores = MATCH_COLUMN.SCORES.map(col => matchRow[col]);
 
     for (let i = 0; i < 4; i++) {
       const playerId = playerIds[i];
+      const playerName = playerNames[i];
       const score = scores[i];
 
       if (!playerMap.has(playerId)) {
@@ -69,6 +71,7 @@ function processMatchRating(matchRow, playerMap) {
       const player = playerMap.get(playerId);
       players.push({
         ...player,
+        name: playerName || player.name, // 対局データの名前を優先、なければ既存の名前を使用
         score: score,
         placement: i + 1 // 順位は1-4（左から順に1位、2位、3位、4位）
       });

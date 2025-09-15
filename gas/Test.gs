@@ -14,7 +14,8 @@ function runAllTests() {
     testRatingCalculation,
     testPlayerManager,
     testSheetManager,
-    testDataValidation
+    testDataValidation,
+    testPlayerNameUpdate
   ];
 
   let passedCount = 0;
@@ -336,6 +337,98 @@ function testEndToEnd() {
 
   } catch (error) {
     logError(`✗ エンドツーエンドテスト - FAIL: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * プレイヤー名自動更新テスト
+ */
+function testPlayerNameUpdate() {
+  logInfo('=== プレイヤー名自動更新テスト開始 ===');
+
+  try {
+    // テスト用対局データ（名前が変更されたケース）
+    const testMatch = new Array(18).fill('');
+    const now = new Date();
+    testMatch[MATCH_COLUMN.START_TIME] = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    testMatch[MATCH_COLUMN.END_TIME] = new Date(now.getTime() - 30 * 60 * 1000);
+
+    // 対局データ内の名前（新しい名前）
+    testMatch[MATCH_COLUMN.PLAYER_IDS[0]] = 'test001';
+    testMatch[MATCH_COLUMN.PLAYER_NAMES[0]] = '新しい名前1'; // 名前変更
+    testMatch[MATCH_COLUMN.SCORES[0]] = 15000;
+
+    testMatch[MATCH_COLUMN.PLAYER_IDS[1]] = 'test002';
+    testMatch[MATCH_COLUMN.PLAYER_NAMES[1]] = 'テスト2位'; // 名前変更なし
+    testMatch[MATCH_COLUMN.SCORES[1]] = 5000;
+
+    testMatch[MATCH_COLUMN.PLAYER_IDS[2]] = 'test003';
+    testMatch[MATCH_COLUMN.PLAYER_NAMES[2]] = 'テスト3位';
+    testMatch[MATCH_COLUMN.SCORES[2]] = -5000;
+
+    testMatch[MATCH_COLUMN.PLAYER_IDS[3]] = 'test004';
+    testMatch[MATCH_COLUMN.PLAYER_NAMES[3]] = 'テスト4位';
+    testMatch[MATCH_COLUMN.SCORES[3]] = -15000;
+
+    // テスト用プレイヤーマップ（古い名前）
+    const testPlayerMap = new Map();
+    testPlayerMap.set('test001', {
+      rowIndex: 2,
+      id: 'test001',
+      name: '古い名前1', // 古い名前
+      rating: 1500,
+      games: 0,
+      lastMatchDate: new Date('2025-01-01')
+    });
+    testPlayerMap.set('test002', {
+      rowIndex: 3,
+      id: 'test002',
+      name: 'テスト2位',
+      rating: 1500,
+      games: 0,
+      lastMatchDate: new Date('2025-01-01')
+    });
+    testPlayerMap.set('test003', {
+      rowIndex: 4,
+      id: 'test003',
+      name: 'テスト3位',
+      rating: 1500,
+      games: 0,
+      lastMatchDate: new Date('2025-01-01')
+    });
+    testPlayerMap.set('test004', {
+      rowIndex: 5,
+      id: 'test004',
+      name: 'テスト4位',
+      rating: 1500,
+      games: 0,
+      lastMatchDate: new Date('2025-01-01')
+    });
+
+    // 対局処理テスト
+    const result = processMatchRating(testMatch, testPlayerMap);
+
+    if (!result.success) {
+      throw new Error(`対局処理失敗: ${result.errors.join(', ')}`);
+    }
+
+    // 名前が更新されているかチェック
+    const updatedPlayer = result.updates.get(2); // test001
+    if (updatedPlayer.name !== '新しい名前1') {
+      throw new Error(`プレイヤー名が更新されていない: 期待値='新しい名前1', 実際='${updatedPlayer.name}'`);
+    }
+
+    // 名前変更がないプレイヤーは元の名前のままかチェック
+    const unchangedPlayer = result.updates.get(3); // test002
+    if (unchangedPlayer.name !== 'テスト2位') {
+      throw new Error(`名前変更なしプレイヤーの名前が不正: 期待値='テスト2位', 実際='${unchangedPlayer.name}'`);
+    }
+
+    logInfo('✓ プレイヤー名自動更新テスト - PASS');
+
+  } catch (error) {
+    logError(`✗ プレイヤー名自動更新テスト - FAIL: ${error.message}`);
     throw error;
   }
 }
