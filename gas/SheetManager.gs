@@ -13,7 +13,7 @@ function getSheets() {
   return {
     playerList: spreadsheet.getSheetByName(SHEET_NAMES.PLAYER_LIST),
     matchData: spreadsheet.getSheetByName(SHEET_NAMES.MATCH_DATA),
-    ratingCalc: spreadsheet.getSheetByName(SHEET_NAMES.RATING_CALC)
+    ratingCalc: spreadsheet.getSheetByName(SHEET_NAMES.RATING_CALC),
   };
 }
 
@@ -30,7 +30,7 @@ function validateSheets(sheets) {
   if (!sheets.ratingCalc) missingSheets.push(SHEET_NAMES.RATING_CALC);
 
   if (missingSheets.length > 0) {
-    logError(`${ERROR_MESSAGES.SHEET_NOT_FOUND}${missingSheets.join(', ')}`);
+    logError(`${ERROR_MESSAGES.SHEET_NOT_FOUND}${missingSheets.join(", ")}`);
     return false;
   }
 
@@ -52,7 +52,7 @@ function loadPlayerData(sheet) {
     const range = sheet.getRange(2, 1, lastRow - 1, 7); // A2からG列まで
     return range.getValues();
   } catch (error) {
-    logError('プレイヤーデータ読み込みエラー', error);
+    logError("プレイヤーデータ読み込みエラー", error);
     return [];
   }
 }
@@ -72,7 +72,7 @@ function loadMatchData(sheet) {
     const range = sheet.getRange(2, 1, lastRow - 1, 18); // A2からR列まで
     return range.getValues();
   } catch (error) {
-    logError('対局データ読み込みエラー', error);
+    logError("対局データ読み込みエラー", error);
     return [];
   }
 }
@@ -91,12 +91,12 @@ function createPlayerMap(playerData) {
       playerMap.set(playerId, {
         rowIndex: index + 2, // シート上の行番号（1ベース、ヘッダー行を考慮）
         id: playerId,
-        name: row[PLAYER_COLUMN.NAME] || '',
+        name: row[PLAYER_COLUMN.NAME] || "",
         rating: isNumber(row[PLAYER_COLUMN.RATING]) ? row[PLAYER_COLUMN.RATING] : DEFAULT_VALUES.RATING,
         games: isNumber(row[PLAYER_COLUMN.GAMES]) ? row[PLAYER_COLUMN.GAMES] : DEFAULT_VALUES.GAMES,
         lastMatchDate: parseDate(row[PLAYER_COLUMN.LAST_MATCH_DATE]) || parseDate(DEFAULT_VALUES.DATE),
         prevMonthRating: isNumber(row[PLAYER_COLUMN.PREV_MONTH_RATING]) ? row[PLAYER_COLUMN.PREV_MONTH_RATING] : DEFAULT_VALUES.RATING,
-        prevMonthGames: isNumber(row[PLAYER_COLUMN.PREV_MONTH_GAMES]) ? row[PLAYER_COLUMN.PREV_MONTH_GAMES] : DEFAULT_VALUES.GAMES
+        prevMonthGames: isNumber(row[PLAYER_COLUMN.PREV_MONTH_GAMES]) ? row[PLAYER_COLUMN.PREV_MONTH_GAMES] : DEFAULT_VALUES.GAMES,
       });
     }
   });
@@ -114,7 +114,7 @@ function getLastUpdateTime(sheet) {
     const lastUpdateValue = sheet.getRange(RATING_CALC_CELLS.LAST_UPDATE_INTERNAL).getValue();
     return parseDate(lastUpdateValue);
   } catch (error) {
-    logError('最終更新日時取得エラー', error);
+    logError("最終更新日時取得エラー", error);
     return null;
   }
 }
@@ -134,7 +134,7 @@ function recordLastUpdateTime(sheet, updateTime) {
 
     logInfo(`最終更新日時を記録: ${displayTime}`);
   } catch (error) {
-    logError('最終更新日時記録エラー', error);
+    logError("最終更新日時記録エラー", error);
   }
 }
 
@@ -153,26 +153,18 @@ function batchUpdatePlayers(sheet, updateData) {
     const updates = [];
     updateData.forEach((player, rowIndex) => {
       const range = sheet.getRange(rowIndex, 1, 1, 7);
-      const values = [[
-        player.id,
-        player.name,
-        player.rating,
-        player.games,
-        formatDate(player.lastMatchDate, DATE_FORMAT.DISPLAY),
-        player.prevMonthRating,
-        player.prevMonthGames
-      ]];
+      const values = [[player.id, player.name, player.rating, player.games, formatDate(player.lastMatchDate, DATE_FORMAT.DISPLAY), player.prevMonthRating, player.prevMonthGames]];
       updates.push({ range, values });
     });
 
     // 一括更新実行
-    updates.forEach(update => {
+    updates.forEach((update) => {
       update.range.setValues(update.values);
     });
 
     logInfo(`${updateData.size}件のプレイヤーデータを更新`);
   } catch (error) {
-    logError('プレイヤーデータ一括更新エラー', error);
+    logError("プレイヤーデータ一括更新エラー", error);
     throw error;
   }
 }
@@ -192,14 +184,14 @@ function batchAddPlayers(sheet, newPlayers) {
     const startRow = lastRow + 1;
 
     // 新規プレイヤーデータを2次元配列に変換
-    const values = newPlayers.map(player => [
+    const values = newPlayers.map((player) => [
       player.id,
       player.name,
       player.rating,
       player.games,
       formatDate(player.lastMatchDate, DATE_FORMAT.DISPLAY),
       player.prevMonthRating,
-      player.prevMonthGames
+      player.prevMonthGames,
     ]);
 
     // 一括追加実行
@@ -208,7 +200,7 @@ function batchAddPlayers(sheet, newPlayers) {
 
     logInfo(`${newPlayers.length}件の新規プレイヤーを追加`);
   } catch (error) {
-    logError('新規プレイヤー一括追加エラー', error);
+    logError("新規プレイヤー一括追加エラー", error);
     throw error;
   }
 }
