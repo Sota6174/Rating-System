@@ -8,9 +8,7 @@
  */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu('レーティングシステム')
-    .addItem('レーティング計算実行', 'processRatings')
-    .addToUi();
+  ui.createMenu("レーティングシステム").addItem("レーティング計算実行", "processRatings").addToUi();
 }
 
 /**
