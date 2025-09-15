@@ -13,8 +13,8 @@ function findNewPlayers(matchData, playerMap) {
   const newPlayerIds = new Set();
 
   // 対局データから全プレイヤーIDを収集
-  matchData.forEach(match => {
-    MATCH_COLUMN.PLAYER_IDS.forEach(col => {
+  matchData.forEach((match) => {
+    MATCH_COLUMN.PLAYER_IDS.forEach((col) => {
       const playerId = match[col];
       if (isValidPlayerId(playerId) && !playerMap.has(playerId)) {
         newPlayerIds.add(playerId);
@@ -31,7 +31,7 @@ function findNewPlayers(matchData, playerMap) {
   const playerNames = new Map();
 
   // プレイヤーIDと名前のマッピングを作成
-  matchData.forEach(match => {
+  matchData.forEach((match) => {
     MATCH_COLUMN.PLAYER_IDS.forEach((idCol, index) => {
       const playerId = match[idCol];
       const playerName = match[MATCH_COLUMN.PLAYER_NAMES[index]];
@@ -43,15 +43,15 @@ function findNewPlayers(matchData, playerMap) {
   });
 
   // 新規プレイヤーオブジェクト作成
-  newPlayerIds.forEach(playerId => {
+  newPlayerIds.forEach((playerId) => {
     const player = setPlayerDefaults({
       id: playerId,
-      name: playerNames.get(playerId) || playerId
+      name: playerNames.get(playerId) || playerId,
     });
     newPlayers.push(player);
   });
 
-  logInfo(`${newPlayers.length}名の新規プレイヤーを検出: ${newPlayers.map(p => p.name).join(', ')}`);
+  logInfo(`${newPlayers.length}名の新規プレイヤーを検出: ${newPlayers.map((p) => p.name).join(", ")}`);
   return newPlayers;
 }
 
@@ -66,7 +66,7 @@ function addPlayersToMap(playerMap, newPlayers, startRowIndex) {
     const rowIndex = startRowIndex + index;
     const playerWithRow = {
       ...player,
-      rowIndex: rowIndex
+      rowIndex: rowIndex,
     };
     playerMap.set(player.id, playerWithRow);
   });
@@ -83,7 +83,7 @@ function processPlayerData(sheets, matchData) {
     success: false,
     playerMap: new Map(),
     newPlayersCount: 0,
-    errors: []
+    errors: [],
   };
 
   try {
@@ -111,9 +111,8 @@ function processPlayerData(sheets, matchData) {
 
     result.success = true;
     return result;
-
   } catch (error) {
-    logError('プレイヤーデータ処理エラー', error);
+    logError("プレイヤーデータ処理エラー", error);
     result.errors.push(`プレイヤーデータ処理中にエラーが発生しました: ${error.message}`);
     return result;
   }
@@ -131,21 +130,21 @@ function getPlayerStats(playerMap) {
       averageRating: 0,
       averageGames: 0,
       highestRating: 0,
-      lowestRating: 0
+      lowestRating: 0,
     };
   }
 
   const players = Array.from(playerMap.values());
   const totalRating = players.reduce((sum, player) => sum + player.rating, 0);
   const totalGames = players.reduce((sum, player) => sum + player.games, 0);
-  const ratings = players.map(player => player.rating);
+  const ratings = players.map((player) => player.rating);
 
   return {
     totalPlayers: players.length,
     averageRating: Math.round((totalRating / players.length) * 100) / 100,
     averageGames: Math.round((totalGames / players.length) * 100) / 100,
     highestRating: Math.max(...ratings),
-    lowestRating: Math.min(...ratings)
+    lowestRating: Math.min(...ratings),
   };
 }
 
@@ -160,7 +159,7 @@ function displayPlayerList(playerMap, limit = 10) {
   // レーティング順でソート
   players.sort((a, b) => b.rating - a.rating);
 
-  console.log('=== プレイヤー一覧 (上位' + Math.min(limit, players.length) + '名) ===');
+  console.log("=== プレイヤー一覧 (上位" + Math.min(limit, players.length) + "名) ===");
   players.slice(0, limit).forEach((player, index) => {
     console.log(`${index + 1}位: ${player.name} (${player.id}) - レート: ${player.rating}, 対局数: ${player.games}`);
   });

@@ -8,11 +8,7 @@
  */
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu('レーティングシステム')
-    .addItem('レーティング計算実行', 'processRatings')
-    .addSeparator()
-    .addItem('テスト実行', 'runTests')
-    .addToUi();
+  ui.createMenu("レーティングシステム").addItem("レーティング計算実行", "processRatings").addSeparator().addItem("テスト実行", "runTests").addToUi();
 }
 
 /**
@@ -23,21 +19,21 @@ function processRatings() {
   const timer = new Timer();
 
   try {
-    logInfo('=== レーティング処理開始 ===');
+    logInfo("=== レーティング処理開始 ===");
 
     // シート参照取得・検証
     const sheets = getSheets();
     if (!validateSheets(sheets)) {
-      showErrorDialog('必要なシートが見つかりません。シート構成を確認してください。');
+      showErrorDialog("必要なシートが見つかりません。シート構成を確認してください。");
       return;
     }
 
     // データ読み込みフェーズ
-    logInfo('データ読み込み開始');
+    logInfo("データ読み込み開始");
     const matchData = loadMatchData(sheets.matchData);
     const lastUpdateTime = getLastUpdateTime(sheets.ratingCalc);
 
-    logInfo(`対局データ: ${matchData.length}局, 最終更新: ${lastUpdateTime ? formatDate(lastUpdateTime) : '未設定'}`);
+    logInfo(`対局データ: ${matchData.length}局, 最終更新: ${lastUpdateTime ? formatDate(lastUpdateTime) : "未設定"}`);
 
     // 新規対局抽出
     const newMatches = findNewMatches(matchData, lastUpdateTime);
@@ -48,23 +44,23 @@ function processRatings() {
     }
 
     // プレイヤーデータ処理
-    logInfo('プレイヤーデータ処理開始');
+    logInfo("プレイヤーデータ処理開始");
     const playerResult = processPlayerData(sheets, newMatches);
     if (!playerResult.success) {
-      showErrorDialog('プレイヤーデータ処理でエラーが発生しました:\n' + playerResult.errors.join('\n'));
+      showErrorDialog("プレイヤーデータ処理でエラーが発生しました:\n" + playerResult.errors.join("\n"));
       return;
     }
 
     // 対局処理フェーズ
-    logInfo('対局レーティング計算開始');
+    logInfo("対局レーティング計算開始");
     const matchResult = batchProcessMatches(newMatches, playerResult.playerMap);
     if (!matchResult.success) {
-      showErrorDialog('対局処理でエラーが発生しました:\n' + matchResult.errors.join('\n'));
+      showErrorDialog("対局処理でエラーが発生しました:\n" + matchResult.errors.join("\n"));
       return;
     }
 
     // データ更新フェーズ
-    logInfo('データ更新開始');
+    logInfo("データ更新開始");
     if (matchResult.playerUpdates.size > 0) {
       batchUpdatePlayers(sheets.playerList, matchResult.playerUpdates);
     }
@@ -83,18 +79,16 @@ function processRatings() {
       `新規プレイヤー数: ${playerResult.newPlayersCount}名`,
       `総プレイヤー数: ${stats.totalPlayers}名`,
       ``,
-      `${timer.elapsedMessage()}`
-    ].join('\n');
+      `${timer.elapsedMessage()}`,
+    ].join("\n");
 
     showSuccessDialog(summary);
-    logInfo('=== レーティング処理完了 ===');
-
+    logInfo("=== レーティング処理完了 ===");
   } catch (error) {
-    logError('メイン処理でエラーが発生しました', error);
+    logError("メイン処理でエラーが発生しました", error);
     showErrorDialog(`システムエラーが発生しました:\n${error.message}\n\n実行ログを確認してください。`);
   }
 }
-
 
 /**
  * 成功ダイアログ表示
@@ -102,7 +96,7 @@ function processRatings() {
  */
 function showSuccessDialog(message) {
   const ui = SpreadsheetApp.getUi();
-  ui.alert('処理完了', message, ui.ButtonSet.OK);
+  ui.alert("処理完了", message, ui.ButtonSet.OK);
 }
 
 /**
@@ -111,7 +105,7 @@ function showSuccessDialog(message) {
  */
 function showInfoDialog(message) {
   const ui = SpreadsheetApp.getUi();
-  ui.alert('情報', message, ui.ButtonSet.OK);
+  ui.alert("情報", message, ui.ButtonSet.OK);
 }
 
 /**
@@ -120,9 +114,8 @@ function showInfoDialog(message) {
  */
 function showErrorDialog(message) {
   const ui = SpreadsheetApp.getUi();
-  ui.alert('エラー', message, ui.ButtonSet.OK);
+  ui.alert("エラー", message, ui.ButtonSet.OK);
 }
-
 
 /**
  * テスト実行（開発用）
@@ -130,15 +123,14 @@ function showErrorDialog(message) {
 function runTests() {
   try {
     const timer = new Timer();
-    logInfo('=== テスト実行開始 ===');
+    logInfo("=== テスト実行開始 ===");
 
     runAllTests();
 
     const message = `テスト実行完了\n\n${timer.elapsedMessage()}\n\n詳細はコンソールログを確認してください。`;
     showInfoDialog(message);
-
   } catch (error) {
-    logError('テスト実行エラー', error);
-    showErrorDialog('テスト実行に失敗しました。');
+    logError("テスト実行エラー", error);
+    showErrorDialog("テスト実行に失敗しました。");
   }
 }

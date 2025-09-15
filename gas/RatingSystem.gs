@@ -20,7 +20,7 @@ function calculateRatingChange(player, placement, tableAvgRating) {
   // 3. 対局数補正
   let gamesCorrection;
   if (player.games < RATING_CONFIG.MAX_CORRECTION_GAMES) {
-    gamesCorrection = 1 - (player.games * RATING_CONFIG.GAMES_FACTOR);
+    gamesCorrection = 1 - player.games * RATING_CONFIG.GAMES_FACTOR;
   } else {
     gamesCorrection = RATING_CONFIG.MIN_CORRECTION;
   }
@@ -41,7 +41,7 @@ function processMatchRating(matchRow, playerMap) {
   const result = {
     success: false,
     updates: new Map(),
-    errors: []
+    errors: [],
   };
 
   try {
@@ -54,11 +54,13 @@ function processMatchRating(matchRow, playerMap) {
 
     // プレイヤー情報取得
     const players = [];
-    const playerIds = MATCH_COLUMN.PLAYER_IDS.map(col => matchRow[col]);
-    const scores = MATCH_COLUMN.SCORES.map(col => matchRow[col]);
+    const playerIds = MATCH_COLUMN.PLAYER_IDS.map((col) => matchRow[col]);
+    const playerNames = MATCH_COLUMN.PLAYER_NAMES.map((col) => matchRow[col]);
+    const scores = MATCH_COLUMN.SCORES.map((col) => matchRow[col]);
 
     for (let i = 0; i < 4; i++) {
       const playerId = playerIds[i];
+      const playerName = playerNames[i];
       const score = scores[i];
 
       if (!playerMap.has(playerId)) {
@@ -69,8 +71,9 @@ function processMatchRating(matchRow, playerMap) {
       const player = playerMap.get(playerId);
       players.push({
         ...player,
+        name: playerName || player.name, // 対局データの名前を優先、なければ既存の名前を使用
         score: score,
-        placement: i + 1 // 順位は1-4（左から順に1位、2位、3位、4位）
+        placement: i + 1, // 順位は1-4（左から順に1位、2位、3位、4位）
       });
     }
 
@@ -81,7 +84,7 @@ function processMatchRating(matchRow, playerMap) {
     // 各プレイヤーのレーティング更新
     const endTime = parseDate(matchRow[MATCH_COLUMN.END_TIME]);
 
-    players.forEach(player => {
+    players.forEach((player) => {
       const ratingChange = calculateRatingChange(player, player.placement, tableAvgRating);
       const newRating = player.rating + ratingChange;
 
@@ -90,17 +93,16 @@ function processMatchRating(matchRow, playerMap) {
         rating: Math.round(newRating * 100) / 100, // 小数点2桁まで
         games: player.games + 1,
         lastMatchDate: endTime,
-        ratingChange: Math.round(ratingChange * 100) / 100
+        ratingChange: Math.round(ratingChange * 100) / 100,
       };
 
       result.updates.set(player.rowIndex, updatedPlayer);
 
-      console.log(`${player.name} (${player.id}): ${player.rating} → ${updatedPlayer.rating} (${ratingChange > 0 ? '+' : ''}${updatedPlayer.ratingChange})`);
+      console.log(`${player.name} (${player.id}): ${player.rating} → ${updatedPlayer.rating} (${ratingChange > 0 ? "+" : ""}${updatedPlayer.ratingChange})`);
     });
 
     result.success = true;
     return result;
-
   } catch (error) {
     logError(`対局処理エラー`, error);
     result.errors.push(`対局処理中にエラーが発生しました: ${error.message}`);
@@ -116,11 +118,11 @@ function processMatchRating(matchRow, playerMap) {
  */
 function findNewMatches(matchData, lastUpdateTime) {
   if (!lastUpdateTime) {
-    logInfo('最終更新日時が未設定のため、全対局を処理対象とします');
+    logInfo("最終更新日時が未設定のため、全対局を処理対象とします");
     return matchData;
   }
 
-  const newMatches = matchData.filter(row => {
+  const newMatches = matchData.filter((row) => {
     const endTime = parseDate(row[MATCH_COLUMN.END_TIME]);
     return endTime && endTime > lastUpdateTime;
   });
@@ -140,7 +142,7 @@ function batchProcessMatches(matches, playerMap) {
     success: false,
     processedCount: 0,
     playerUpdates: new Map(),
-    errors: []
+    errors: [],
   };
 
   if (matches.length === 0) {
@@ -156,7 +158,7 @@ function batchProcessMatches(matches, playerMap) {
     const matchResult = processMatchRating(match, playerMap);
 
     if (!matchResult.success) {
-      result.errors.push(`${i + 1}局目: ${matchResult.errors.join(', ')}`);
+      result.errors.push(`${i + 1}局目: ${matchResult.errors.join(", ")}`);
       continue;
     }
 
@@ -173,7 +175,7 @@ function batchProcessMatches(matches, playerMap) {
   // エラーがある場合は失敗とする
   if (result.errors.length > 0) {
     logError(`${result.errors.length}件のエラーが発生しました`);
-    result.errors.forEach(error => logError(error));
+    result.errors.forEach((error) => logError(error));
     result.success = false;
   } else {
     result.success = true;
@@ -195,7 +197,7 @@ function getLatestEndTime(matches) {
 
   let latestTime = null;
 
-  matches.forEach(match => {
+  matches.forEach((match) => {
     const endTime = parseDate(match[MATCH_COLUMN.END_TIME]);
     if (endTime && (!latestTime || endTime > latestTime)) {
       latestTime = endTime;
